@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">TradeShowProj</string>
+    <string name="url_scheme">jotterspacedoteknathdotdev://</string>
+    <string name="home">Home Screen</string>
+    <string name="empty_string"> </string>
+    <string name="note_title_placeholder">Title..</string>
+    <string name="note_content_placeholder">Your note here....</string>
+    <string name="signup">Sign Up</string>
+    <string name="login">Login</string>
+    <string name="notes">Notes</string>
+    <string name="note">Note</string>
+    <string name="confirm">SignUp</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="account_creation">Account Creation</string>
+</resources>
