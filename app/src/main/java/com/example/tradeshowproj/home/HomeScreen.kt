@@ -9,6 +9,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -35,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -48,7 +51,9 @@ import com.example.tradeshowproj.components.DefaultTopAppBar
 import com.example.tradeshowproj.entities.JotNote
 import com.example.tradeshowproj.gettingstarted.Spacer
 import com.example.tradeshowproj.navigation.AppNavSpec
+import com.example.tradeshowproj.zCatalystSDK.ZApiSDK
 import com.example.tradeshowproj.zCatalystSDK.ZAuthSDK
+import com.zoho.catalyst.setup.ZCatalystApp
 import dev.eknath.jottersspace.ui.screens.note.NoteContent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -60,102 +65,135 @@ import kotlin.coroutines.suspendCoroutine
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = HomeViewModel(),
+
     modifier: Modifier = Modifier,
     navController: NavController,
     name: String,
     scope: CoroutineScope = rememberCoroutineScope()
+
 ) {
-    val authSDK = ZAuthSDK
-    val zApiSDK = ZAuthSDK.zApiSDK
-    val jots = remember { mutableStateOf(emptyList<JotNote>()) }
-    var currentJot: JotNote? by remember { mutableStateOf(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    var reFetchJot by remember { mutableStateOf(false) }
+    val deck = PostRequest(
+        name = "Deck 1",
+        description = "A test deck",
+        isPublic = true,
+        image = "base64encodedimagehere",
+        cards = listOf(
+            Card(question = "What is the capital of France?", cardimage = "base64encodedimage1", answer = "Paris"),
+            Card(question = "What is 2 + 2?", cardimage = "base64encodedimage2", answer = "4")
+        )
+    )
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
 
-    suspend fun createJot(jot: JotNote): JotNote {
-        return suspendCoroutine { cont ->
-            zApiSDK.createNewJot(
-                data = JotNote(
-                    title = jot.title,
-                    note = jot.note
-                ),
-                onSuccess = {
-                    reFetchJot = true
-                    cont.resume(it)
-                },
-                onFailure = {
-                    cont.resume(jot)
-                    Log.e("Test", "FFFF")
-                }
-            )
-        }
-    }
-
-    suspend fun updateJot(jot: JotNote): JotNote {
-        return suspendCoroutine { cont ->
-            zApiSDK.updateJot(
-                data = jot,
-                onSuccess = {
-                    reFetchJot = true
-                    cont.resume(it)
-                },
-                onFailure = {
-                    cont.resume(jot)
-                    Log.e("Test", "FFFF")
-                }
-            )
-        }
-    }
-
-    fun handleOnSave(jot: JotNote): Deferred<JotNote> {
-        return scope.async {
-            if (jot.id == 0L) {
-                createJot(jot)
-            } else {
-                updateJot(jot)
-            }
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            DefaultTopAppBar(
-                titleStringRes = R.string.notes,
-                isLoading = false,
-                actions = {
-                    DefaultIconButton(
-                        iconRes = R.drawable.ic_logout,
-                        onClick = {
-                            scope.launch {
-                                authSDK.logOutUser(
-                                    onSuccess = {
-                                        navController.navigate(AppNavSpec.AppSwitcher)
-                                    },
-                                    onError = {}
-                                )
-                            }
-                        }
-                    )
-                }
-            )
-
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.primary,
-                shape = CircleShape,
-                onClick = {
-                    currentJot = JotNote(title = "", note = "")
-                }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End
     ) {
 
-        Surface(modifier = Modifier.padding(it)) {
-            Column(modifier = Modifier.fillMaxSize()) {
+
+        Button(onClick = {
+//            val zCatalystApp = ZCatalystApp.getInstance() // Ensure you get the correct instance
+//            val zApiSDK = ZApiSDK(zCatalystApp)
+//            zApiSDK.getGETfunction()
+            viewModel.sendPostRequest(deck)
+        }) {
+            Text("Call API")
+        }
+    }
+
+
+}
+//    val authSDK = ZAuthSDK
+//    val zApiSDK = ZAuthSDK.zApiSDK
+//    val jots = remember { mutableStateOf(emptyList<JotNote>()) }
+//    var currentJot: JotNote? by remember { mutableStateOf(null) }
+//    var isLoading by remember { mutableStateOf(false) }
+//    var reFetchJot by remember { mutableStateOf(false) }
+//
+//    suspend fun createJot(jot: JotNote): JotNote {
+//        return suspendCoroutine { cont ->
+//            zApiSDK.createNewJot(
+//                data = JotNote(
+//                    title = jot.title,
+//                    note = jot.note
+//                ),
+//                onSuccess = {
+//                    reFetchJot = true
+//                    cont.resume(it)
+//                },
+//                onFailure = {
+//                    cont.resume(jot)
+//                    Log.e("Test", "FFFF")
+//                }
+//            )
+//        }
+//    }
+//
+//    suspend fun updateJot(jot: JotNote): JotNote {
+//        return suspendCoroutine { cont ->
+//            zApiSDK.updateJot(
+//                data = jot,
+//                onSuccess = {
+//                    reFetchJot = true
+//                    cont.resume(it)
+//                },
+//                onFailure = {
+//                    cont.resume(jot)
+//                    Log.e("Test", "FFFF")
+//                }
+//            )
+//        }
+//    }
+//
+//    fun handleOnSave(jot: JotNote): Deferred<JotNote> {
+//        return scope.async {
+//            if (jot.id == 0L) {
+//                createJot(jot)
+//            } else {
+//                updateJot(jot)
+//            }
+//        }
+//    }
+//
+//    Scaffold(
+//        topBar = {
+//            DefaultTopAppBar(
+//                titleStringRes = R.string.notes,
+//                isLoading = false,
+//                actions = {
+//                    DefaultIconButton(
+//                        iconRes = R.drawable.ic_logout,
+//                        onClick = {
+//                            scope.launch {
+//                                authSDK.logOutUser(
+//                                    onSuccess = {
+//                                        navController.navigate(AppNavSpec.AppSwitcher)
+//                                    },
+//                                    onError = {}
+//                                )
+//                            }
+//                        }
+//                    )
+//                }
+//            )
+//
+//        },
+//        floatingActionButton = {
+//            FloatingActionButton(
+//                containerColor = MaterialTheme.colorScheme.primary,
+//                shape = CircleShape,
+//                onClick = {
+//                    currentJot = JotNote(title = "", note = "")
+//                }
+//            ) {
+//                Icon(Icons.Default.Add, contentDescription = "Add")
+//            }
+//        },
+//        floatingActionButtonPosition = FabPosition.End
+//    ) {
+
+//        Surface(modifier = Modifier.padding(it)) {
+//            Column(modifier = Modifier.fillMaxSize()) {
 //                Text("Hello $name")
 //
 //                TextField(value = title, onValueChange = { title = it })
@@ -189,94 +227,94 @@ fun HomeScreen(
 //                    Text("Create Note")
 //                }
 
-                LazyColumn {
-                    items(jots.value) {
-                        NoteListItem(it) {
-                            currentJot = it
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    AnimatedVisibility(
-        visible = currentJot != null,
-        enter = scaleIn(
-            animationSpec = tween(durationMillis = 500),
-            transformOrigin = TransformOrigin(1f, 1f) // Bottom-right corner
-        ) + fadeIn(),
-        exit = scaleOut(
-            animationSpec = tween(durationMillis = 500),
-            transformOrigin = TransformOrigin(1f, 1f) // Bottom-right corner
-        ) + fadeOut()
-    ) {
-        if (currentJot != null)
-            NoteContent(
-                jotNote = currentJot!!,
-                onSaveChange = {
-                    handleOnSave(it)
-                },
-                onBackPressed = {
-                    currentJot = null
-                },
-            )
-    }
-
-    LaunchedEffect(key1 = Unit, key2 = reFetchJot) {
-        if (reFetchJot || jots.value.isEmpty())
-            scope.launch {
-                zApiSDK.getBulkJots(
-                    onSuccess = {
-                        Log.e("Test", "SSSS: ${it.data.size}")
-                        jots.value = it.data
-                        reFetchJot = false
-                    },
-                    onFailure = {
-                        Log.e("Test", "FFFF")
-                        jots.value = emptyList()
-                        reFetchJot = false
-                    }
-                )
-            }
-    }
-}
-
-@Composable
-fun NoteListItem(
-    note: JotNote,
-    modifier: Modifier = Modifier,
-    onClick: (JotNote) -> Unit = {}
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick(note) },
-        shape = RoundedCornerShape(8.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onBackground)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = note.title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                maxLines = 1
-            )
-            Spacer(height = 4.dp)
-            Text(
-                text = note.note,
-                fontSize = 14.sp,
-                color = Color.DarkGray,
-                maxLines = 3
-            )
-        }
-    }
-}
-
-
+//                LazyColumn {
+//                    items(jots.value) {
+//                        NoteListItem(it) {
+//                            currentJot = it
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    AnimatedVisibility(
+//        visible = currentJot != null,
+//        enter = scaleIn(
+//            animationSpec = tween(durationMillis = 500),
+//            transformOrigin = TransformOrigin(1f, 1f) // Bottom-right corner
+//        ) + fadeIn(),
+//        exit = scaleOut(
+//            animationSpec = tween(durationMillis = 500),
+//            transformOrigin = TransformOrigin(1f, 1f) // Bottom-right corner
+//        ) + fadeOut()
+//    ) {
+//        if (currentJot != null)
+//            NoteContent(
+//                jotNote = currentJot!!,
+//                onSaveChange = {
+//                    handleOnSave(it)
+//                },
+//                onBackPressed = {
+//                    currentJot = null
+//                },
+//            )
+//    }
+//
+//    LaunchedEffect(key1 = Unit, key2 = reFetchJot) {
+//        if (reFetchJot || jots.value.isEmpty())
+//            scope.launch {
+//                zApiSDK.getBulkJots(
+//                    onSuccess = {
+//                        Log.e("Test", "SSSS: ${it.data.size}")
+//                        jots.value = it.data
+//                        reFetchJot = false
+//                    },
+//                    onFailure = {
+//                        Log.e("Test", "FFFF")
+//                        jots.value = emptyList()
+//                        reFetchJot = false
+//                    }
+//                )
+//            }
+//    }
+//}
+//
+//@Composable
+//fun NoteListItem(
+//    note: JotNote,
+//    modifier: Modifier = Modifier,
+//    onClick: (JotNote) -> Unit = {}
+//) {
+//    Card(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .padding(8.dp)
+//            .clickable { onClick(note) },
+//        shape = RoundedCornerShape(8.dp),
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .background(MaterialTheme.colorScheme.onBackground)
+//                .padding(16.dp)
+//        ) {
+//            Text(
+//                text = note.title,
+//                fontSize = 18.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = Color.Black,
+//                maxLines = 1
+//            )
+//            Spacer(height = 4.dp)
+//            Text(
+//                text = note.note,
+//                fontSize = 14.sp,
+//                color = Color.DarkGray,
+//                maxLines = 3
+//            )
+//        }
+//    }
+//}
+//
+//

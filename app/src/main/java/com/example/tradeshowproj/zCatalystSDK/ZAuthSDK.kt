@@ -57,7 +57,7 @@ object ZAuthSDK {
     ) {
         Log.d("catalystlogin","signup called")
         catalystSDK.signUp(
-            newUser = catalystSDK.newUser(firstName = name, email = email),
+            newUser = catalystSDK.newUser(firstName = name, email = email,),
             success = {
                 Log.d("catalystlogin","signup success")
                 onSuccess(it)

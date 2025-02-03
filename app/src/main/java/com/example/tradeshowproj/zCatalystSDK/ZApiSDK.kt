@@ -12,10 +12,12 @@ import com.example.tradeshowproj.entities.BulkJotResponse
 import com.example.tradeshowproj.entities.JotNote
 import com.example.tradeshowproj.entities.PagingInfo
 import com.example.tradeshowproj.entities.Status
+import com.zoho.catalyst.function.ZCatalystFunction
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 object ZCatalystConstants {
+
 
     object zTableIds {
         const val JotsTableId = 12392000000011074
@@ -28,7 +30,7 @@ typealias TABLE_IDS = ZCatalystConstants.zTableIds
 
 
 class ZApiSDK(private val zCatalystApp: ZCatalystApp) {
-
+     val instancefun: ZCatalystFunction = zCatalystApp.getFunctionInstance(12392000000024606)
     private val zFileStore: ZCatalystFileStore = zCatalystApp.getFileStoreInstance()
     private val zDataStore: ZCatalystDataStore = zCatalystApp.getDataStoreInstance()
 
@@ -37,6 +39,37 @@ class ZApiSDK(private val zCatalystApp: ZCatalystApp) {
     private val zLinksTable = zDataStore.getTableInstance(ZCatalystConstants.zTableIds.LinksTableId)
     private val zLinkCollectionsTable =
         zDataStore.getTableInstance(ZCatalystConstants.zTableIds.LinksCollectionTableId)
+
+
+//    fun getFunction(){
+//        val body = HashMap<String, Any>()
+//        body.put("name", "Deck 1")
+//        body.put("description", "A test deck")
+//        body.put("isPublic",true)
+//        body.put("image","base64encodedimagehere")
+//        instancefun.executePost(
+//            hashMapOf(),
+//            body,
+//            success = {
+//                println("Success")
+//            },
+//            failure = {
+//                println("failure")
+//            }
+//        )
+//    }
+
+    fun getGETfunction(){
+        instancefun.executeGet(
+            hashMapOf(),
+            success = {
+                println("Success")
+            },
+            failure = {
+                println("failure")
+            }
+        )
+    }
 
 
     suspend fun fetchUserDetails(): ZCatalystUser? {
